@@ -13,6 +13,7 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("reflect"))
     testImplementation(kotlin("test"))
 }
 
@@ -25,5 +26,5 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("com.staricka.adventofcode2022.MainKt")
 }
