@@ -3,20 +3,39 @@ package com.staricka.adventofcode2022
 import kotlin.reflect.full.createInstance
 
 fun main(args: Array<String>) {
-  println("Run which day?")
+  val input = System.getenv("DAY") ?: run {
+    println("Run which day?")
+    readln()
+  }
 
-  // TODO: part selection, input bypass?, env variable for quick execution?
-  val input = readln().toIntOrNull()
-  if (input == null) {
+  if (input.isBlank()) {
     println("Invalid day")
     return
   }
 
-  val day = Class.forName("com.staricka.adventofcode2022.Day$input")?.kotlin
-  if (day == null) {
+  val part = when (input[input.length - 1]) {
+    'a' -> DayPart.PART1
+    'b' -> DayPart.PART2
+    else -> DayPart.BOTH
+  }
+
+  val dayNumber = if (part == DayPart.BOTH) input.toIntOrNull() else input.substring(0..input.length-2).toIntOrNull()
+
+  if (dayNumber == null) {
     println("Invalid day")
     return
   }
 
-  (day.createInstance() as Day).run(DayPart.BOTH)
+  try {
+    val day = Class.forName("com.staricka.adventofcode2022.Day$dayNumber")?.kotlin
+
+    if (day == null) {
+      println("Invalid day")
+      return
+    }
+
+    (day.createInstance() as Day).run(part)
+  } catch (_: ClassNotFoundException) {
+    println("Invalid day")
+  }
 }
