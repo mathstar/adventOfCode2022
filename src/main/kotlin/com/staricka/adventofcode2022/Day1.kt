@@ -6,7 +6,7 @@ import kotlin.math.max
 class Day1 : Day {
   override val id = 1
 
-  override fun part1(input: String) {
+  override fun part1(input: String): Any {
     var max = 0
     var sum = 0
     for (line in input.lines()) {
@@ -18,10 +18,10 @@ class Day1 : Day {
       }
     }
     max = max(sum, max)
-    println(max)
+    return max
   }
 
-  override fun part2(input: String) {
+  override fun part2(input: String): Any {
     val max = PriorityQueue<Int>(Comparator.reverseOrder())
     var sum = 0
     for (line in input.lines()) {
@@ -33,6 +33,6 @@ class Day1 : Day {
       }
     }
     max.add(sum)
-    println("${max.poll() + max.poll() + max.poll()}")
+    return "${max.poll() + max.poll() + max.poll()}"
   }
 }
