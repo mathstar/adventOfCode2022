@@ -33,6 +33,6 @@ class Day1 : Day {
       }
     }
     max.add(sum)
-    return "${max.poll() + max.poll() + max.poll()}"
+    return max.poll() + max.poll() + max.poll()
   }
 }
