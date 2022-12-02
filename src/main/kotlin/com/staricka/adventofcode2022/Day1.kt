@@ -3,6 +3,7 @@ package com.staricka.adventofcode2022
 import java.util.PriorityQueue
 import kotlin.math.max
 
+@Suppress("unused")
 class Day1 : Day {
   override val id = 1
 
