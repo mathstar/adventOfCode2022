@@ -31,35 +31,40 @@ class Day2 : Day {
         }
         else -> throw Exception()
       }
+  }
 
-    companion object {
-      fun fromChar(c: Char) : Choice =
-        when (c) {
-          'A' -> ROCK
-          'B' -> PAPER
-          'C' -> SCISSORS
-          'X' -> ROCK
-          'Y' -> PAPER
-          'Z' -> SCISSORS
-          else -> throw Exception()
-        }
+  private fun String.toChoice() : Choice =
+    when (this[0]) {
+      'A' -> Choice.ROCK
+      'B' -> Choice.PAPER
+      'C' -> Choice.SCISSORS
+      'X' -> Choice.ROCK
+      'Y' -> Choice.PAPER
+      'Z' -> Choice.SCISSORS
+      else -> throw Exception()
     }
+
+  private fun String.lineToPart1Choices() : Pair<Choice, Choice> {
+    val split = this.split(" ")
+    return Pair(split[0].toChoice(), split[1].toChoice())
+  }
+
+  private fun String.lineToPart2Choices() : Pair<Choice, Choice> {
+    val split = this.split(" ")
+    val opponent = split[0].toChoice()
+    return Pair(opponent, opponent.makeChoice(split[1][0]))
   }
 
   override fun part1(input: String): Any {
     return input.lines().filter { it.isNotBlank() }.map {
-      val opponent = Choice.fromChar(it.split(" ")[0][0])
-      val mine = Choice.fromChar(it.split(" ")[1][0])
-
+      val (opponent, mine) = it.lineToPart1Choices()
       mine.score + mine.outcome(opponent)
     }.sum()
   }
 
   override fun part2(input: String): Any =
     input.lines().filter { it.isNotBlank() }.map {
-      val opponent = Choice.fromChar(it.split(" ")[0][0])
-      val mine = opponent.makeChoice(it.split(" ")[1][0])
-
+      val (opponent, mine) = it.lineToPart2Choices()
       mine.score + mine.outcome(opponent)
     }.sum()
 }
