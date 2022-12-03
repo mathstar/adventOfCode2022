@@ -13,15 +13,7 @@ class Day3 : Day {
 
   override fun part1(input: String): Any =
     input.lines().sumOf {
-      val chars = it.toCharArray()
-      val left = HashSet<Char>()
-      val right = HashSet<Char>()
-      for (i in 0 until chars.size / 2) {
-        left.add(chars[i])
-        right.add(chars[chars.size / 2 + i])
-      }
-
-      left.intersect(right).first().itemToPriority()
+      it.substring(0, it.length / 2).toSet().intersect(it.substring(it.length / 2).toSet()).first().itemToPriority()
     }
 
   override fun part2(input: String): Any {
