@@ -4,16 +4,15 @@ package com.staricka.adventofcode2022
 class Day3 : Day {
   override val id = 3
 
-  fun Char.itemToPriority() : Int {
-    return if (this.isLowerCase()) {
+  private fun Char.itemToPriority() : Int =
+    if (this.isLowerCase()) {
       this.minus('a') + 1
     } else {
       this.minus('A') + 27
     }
-  }
 
-  override fun part1(input: String): Any? =
-    input.lines().map {
+  override fun part1(input: String): Any =
+    input.lines().sumOf {
       val chars = it.toCharArray()
       val left = HashSet<Char>()
       val right = HashSet<Char>()
@@ -23,9 +22,9 @@ class Day3 : Day {
       }
 
       left.intersect(right).first().itemToPriority()
-    }.sum()
+    }
 
-  override fun part2(input: String): Any? {
+  override fun part2(input: String): Any {
     val lines = input.lines()
     var sum = 0
     var i = 0
@@ -34,15 +33,14 @@ class Day3 : Day {
     }
     return sum
   }
-
-
 }
 
-fun main(vars: Array<String>) {
-  println(Day3().part1("vJrwpWtwJgWrhcsFMMfFFhFp\n" +
-      "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL\n" +
-      "PmmdzqPrVvPwwTWBwg\n" +
-      "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn\n" +
-      "ttgJtRGJQctTZtZT\n" +
-      "CrZsJsPPZsGzwwsLwLmpwMDw"))
+fun main() {
+  println(Day3().part1(
+    """vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw"""))
 }
