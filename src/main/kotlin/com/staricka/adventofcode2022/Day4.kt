@@ -3,24 +3,22 @@ package com.staricka.adventofcode2022
 class Day4 : Day {
   override val id = 4
 
-  override fun part1(input: String): Any? {
-    return input.lines().filter {
-      val first = it.split(",")[0].split("-").map{ it.toInt() }
-      val second = it.split(",")[1].split("-").map{ it.toInt() }
+  override fun part1(input: String): Any =
+    input.lines().count {
+      val first = it.split(",")[0].split("-").map(String::toInt)
+      val second = it.split(",")[1].split("-").map(String::toInt)
 
       (first[0] <= second[0] && first[1] >= second[1]) || (second[0] <= first[0] && second[1] >= first[1])
-    }.count()
-  }
+    }
 
-  override fun part2(input: String): Any? {
-    return input.lines().filter {
-      val first = it.split(",")[0].split("-").map{ it.toInt() }
-      val second = it.split(",")[1].split("-").map{ it.toInt() }
+  override fun part2(input: String): Any =
+    input.lines().count {
+      val first = it.split(",")[0].split("-").map(String::toInt)
+      val second = it.split(",")[1].split("-").map(String::toInt)
 
       (first[0] <= second[0] && first[1] >= second[0]) || (first[0] <= second[1] && first[1] >= second[1])
           || (second[0] <= first[0] && second[1] >= first[0]) || (second[0] <= first[1] && second[1] >= first[1])
-    }.count()
-  }
+    }
 }
 
 fun main() {
