@@ -2,7 +2,6 @@ package com.staricka.adventofcode2022
 
 import java.lang.Exception
 
-@Suppress("unused")
 class Day2 : Day {
   override val id = 2
 

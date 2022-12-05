@@ -2,7 +2,7 @@ package com.staricka.adventofcode2022
 
 import kotlin.reflect.full.createInstance
 
-fun main(args: Array<String>) {
+fun main() {
   val input = System.getenv("DAY") ?: run {
     println("Run which day?")
     readln()

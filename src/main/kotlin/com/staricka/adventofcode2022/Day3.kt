@@ -1,6 +1,5 @@
 package com.staricka.adventofcode2022
 
-@Suppress("unused")
 class Day3 : Day {
   override val id = 3
 
@@ -25,17 +24,4 @@ class Day3 : Day {
     }
     return sum
   }
-}
-
-fun main() {
-  println(Day3().part1(
-    """
-      vJrwpWtwJgWrhcsFMMfFFhFp
-      jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
-      PmmdzqPrVvPwwTWBwg
-      wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
-      ttgJtRGJQctTZtZT
-      CrZsJsPPZsGzwwsLwLmpwMDw
-    """.trimIndent()
-  ))
 }
