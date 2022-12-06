@@ -77,3 +77,10 @@ class Day5Test : StandardTest(
   "CMZ",
   "MCD"
 )
+
+class Day6Test : StandardTest(
+  Day6(),
+  "mjqjpqmgbljsphdztnvjfqwrcgsmlb",
+  7,
+  19
+)
