@@ -35,3 +35,9 @@ class Day6RegressionTest : RegressionTest(
   1480,
   2746
 )
+
+class Day7RegressionTest : RegressionTest(
+  Day7(),
+  1989474,
+  1111607
+)
