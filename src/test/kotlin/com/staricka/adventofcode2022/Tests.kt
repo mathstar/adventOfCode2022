@@ -115,3 +115,16 @@ class Day7Test : StandardTest(
   95437,
   24933642
 )
+
+class Day8Test : StandardTest(
+  Day8(),
+  """
+    30373
+    25512
+    65332
+    33549
+    35390
+  """.trimIndent(),
+  21,
+  8
+)
