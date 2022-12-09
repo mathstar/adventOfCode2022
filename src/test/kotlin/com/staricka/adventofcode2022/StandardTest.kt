@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 abstract class StandardTest(
-  private val day: Day,
+  val day: Day,
   private val input: String,
   private val part1Output: Any? = null,
   private val part2Output: Any? = null
