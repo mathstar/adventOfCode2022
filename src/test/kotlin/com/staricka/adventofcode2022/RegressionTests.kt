@@ -1,5 +1,7 @@
 package com.staricka.adventofcode2022
 
+import kotlin.test.assertEquals
+
 class Day1RegressionTest : RegressionTest(
   Day1(),
   66186,
@@ -53,3 +55,20 @@ class Day9RegressionTest : RegressionTest(
   6067,
   2471
 )
+
+class Day10RegressionTest : RegressionTest(
+  Day10(),
+  11780,
+  """
+    ###..####.#..#.#....###...##..#..#..##..
+    #..#....#.#..#.#....#..#.#..#.#..#.#..#.
+    #..#...#..#..#.#....###..#..#.#..#.#..#.
+    ###...#...#..#.#....#..#.####.#..#.####.
+    #....#....#..#.#....#..#.#..#.#..#.#..#.
+    #....####..##..####.###..#..#..##..#..#.
+  """.trimIndent() + "\n"
+) {
+  override fun part2RegressionTest() {
+    assertEquals((part2Output as String).lines(), day.part2FromResource())
+  }
+}

@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 abstract class StandardTest(
   val day: Day,
-  private val input: String,
+  val input: String,
   private val part1Output: Any? = null,
   private val part2Output: Any? = null
 ) {
@@ -15,7 +15,7 @@ abstract class StandardTest(
   }
 
   @Test
-  fun part2Test() {
+  open fun part2Test() {
     assertEquals(part2Output, day.part2(input))
   }
 }
