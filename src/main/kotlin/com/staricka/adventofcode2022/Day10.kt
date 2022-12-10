@@ -14,10 +14,15 @@ class Day10 : Day {
     val op: Op,
     val params: List<String>
   ) {
-    fun exec(initial: CpuState): CpuState {
-      when (op) {
-        Op.NOOP -> return initial
-        Op.ADDX -> return CpuState(initial.x + params[0].toInt())
+    fun exec(initial: CpuState, listener: ((CpuState) -> Unit)? = null): CpuState {
+      var state = initial
+      for (i in 1 .. op.cycles) {
+        state = state.incrementClock()
+        listener?.invoke(state)
+      }
+      return when (op) {
+        Op.NOOP -> state
+        Op.ADDX -> state.addX(params[0].toInt())
       }
     }
 
@@ -32,40 +37,37 @@ class Day10 : Day {
     }
   }
 
-  data class CpuState(val x: Int)
+  data class CpuState(val cycle: Int, val x: Int) {
+    fun incrementClock(): CpuState = CpuState(cycle + 1, x)
+    fun addX(param: Int): CpuState = CpuState(cycle, x + param)
+  }
 
   override fun part1(input: String): Any {
     val interestingCycles = arrayOf(20, 60, 100, 140, 180, 220)
 
-    val instructions = input.lines().map { it.toInstruction() }.iterator()
-    var state = CpuState(1)
-    var cycle = 0
+    val instructions = input.lines().map { it.toInstruction() }
+    var state = CpuState(0, 1)
 
     var total = 0
-    while (instructions.hasNext()) {
-      val instruction = instructions.next()
-      for (i in 1 .. instruction.op.cycles) {
-        cycle++
-        if (cycle in interestingCycles) total += cycle * state.x
+
+    instructions.forEach {
+      state = it.exec(state) {workingState ->
+        if (workingState.cycle in interestingCycles) total += workingState.cycle * state.x
       }
-      state = instruction.exec(state)
     }
     return total
   }
 
   override fun part2(input: String): Any {
-    val instructions = input.lines().map { it.toInstruction() }.iterator()
-    var state = CpuState(1)
-    var cycle = 0
+    val instructions = input.lines().map { it.toInstruction() }
+    var state = CpuState(0, 1)
 
     val screen = StringBuilder()
     var xPos = 0
 
-    while (instructions.hasNext()) {
-      val instruction = instructions.next()
-      for (i in 1 .. instruction.op.cycles) {
-        cycle++
-        if (abs(state.x - xPos) <= 1) {
+    instructions.forEach {
+      state = it.exec(state) {workingState ->
+        if (abs(workingState.x - xPos) <= 1) {
           screen.append('#')
         } else {
           screen.append('.')
@@ -76,7 +78,6 @@ class Day10 : Day {
           screen.append(System.lineSeparator())
         }
       }
-      state = instruction.exec(state)
     }
     return screen.toString()
   }
