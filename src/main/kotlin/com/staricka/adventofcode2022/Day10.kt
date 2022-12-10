@@ -42,41 +42,40 @@ class Day10 : Day {
     fun addX(param: Int): CpuState = CpuState(cycle, x + param)
   }
 
-  override fun part1(input: String): Any {
-    val interestingCycles = arrayOf(20, 60, 100, 140, 180, 220)
-
-    val instructions = input.lines().map { it.toInstruction() }
+  private fun executeInstructions(instructions: List<Instruction>, listener: ((CpuState) -> Unit)? = null) {
     var state = CpuState(0, 1)
-
-    var total = 0
-
     instructions.forEach {
-      state = it.exec(state) {workingState ->
-        if (workingState.cycle in interestingCycles) total += workingState.cycle * state.x
-      }
+      state = it.exec(state, listener)
+    }
+  }
+
+  override fun part1(input: String): Any {
+    val instructions = input.lines().map { it.toInstruction() }
+
+    val interestingCycles = arrayOf(20, 60, 100, 140, 180, 220)
+    var total = 0
+    executeInstructions(instructions) {state ->
+      if (state.cycle in interestingCycles) total += state.cycle * state.x
     }
     return total
   }
 
   override fun part2(input: String): Any {
     val instructions = input.lines().map { it.toInstruction() }
-    var state = CpuState(0, 1)
 
     val screen = StringBuilder()
     var xPos = 0
 
-    instructions.forEach {
-      state = it.exec(state) {workingState ->
-        if (abs(workingState.x - xPos) <= 1) {
-          screen.append('#')
-        } else {
-          screen.append('.')
-        }
-        xPos++
-        if (xPos >= 40) {
-          xPos = 0
-          screen.append(System.lineSeparator())
-        }
+    executeInstructions(instructions) {state ->
+      if (abs(state.x - xPos) <= 1) {
+        screen.append('#')
+      } else {
+        screen.append('.')
+      }
+      xPos++
+      if (xPos >= 40) {
+        xPos = 0
+        screen.append(System.lineSeparator())
       }
     }
     return screen.toString()
