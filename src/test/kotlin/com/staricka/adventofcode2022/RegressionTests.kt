@@ -72,3 +72,9 @@ class Day10RegressionTest : RegressionTest(
     assertEquals((part2Output as String).lines(), day.part2FromResource())
   }
 }
+
+class Day11RegressionTest : RegressionTest(
+  Day11(),
+  95472L,
+  17926061332L
+)
