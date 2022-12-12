@@ -364,3 +364,16 @@ Monkey 3:
   10605L,
   2713310158L
 )
+
+class Day12Test : StandardTest(
+  Day12(),
+  """
+    Sabqponm
+    abcryxxl
+    accszExk
+    acctuvwj
+    abdefghi
+  """.trimIndent(),
+  31,
+  29
+)
