@@ -408,3 +408,13 @@ class Day13Test : StandardTest(
   13,
   140
 )
+
+class Day14Test : StandardTest(
+  Day14(),
+  """
+    498,4 -> 498,6 -> 496,6
+    503,4 -> 502,4 -> 502,9 -> 494,9
+  """.trimIndent(),
+  24,
+  93
+)
