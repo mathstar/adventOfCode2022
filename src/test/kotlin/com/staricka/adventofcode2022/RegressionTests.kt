@@ -84,3 +84,9 @@ class Day12RegressionTest : RegressionTest(
   447,
   446
 )
+
+class Day13RegressionTest : RegressionTest(
+  Day13(),
+  5588,
+  23958
+)
