@@ -186,14 +186,46 @@ class Day16 : Day {
     return max
   }
 
+  val pathCullingSet = HashSet<String>()
+  fun haveNotEncounteredPath(path1: String, path2: String): Boolean =
+    if (path1 < path2) {
+      pathCullingSet.add("$path1,$path2")
+    } else {
+      pathCullingSet.add("$path2,$path1")
+    }
+
+  var globalMax = 0
+  // heuristic for whether this path could possibly improve the result
+  fun canImprove(
+    currentEndValue: Int,
+    toVisit: List<String>,
+    valves: Map<String, Valve>,
+    timeRemaining: Int
+  ) : Boolean {
+    // assume it takes two minutes to open each valve (i.e. shortest possible path)
+    var result = currentEndValue
+    var timeRemaining = timeRemaining
+    val sortedValves = toVisit.sortedBy { valves[it]!!.flowRate }.toMutableList()
+    while (sortedValves.size > 0 && timeRemaining > 2) {
+      timeRemaining -= 2
+      result += valves[sortedValves.removeLast()]!!.flowRate * timeRemaining
+      if (sortedValves.size > 0) {
+        result += valves[sortedValves.removeLast()]!!.flowRate * timeRemaining
+      }
+    }
+    return result > globalMax
+  }
+
   fun maxPressureTwoWorkers(
     toVisit: List<String>,
     valves: Map<String, Valve>,
     distances: Map<String, Map<String, Int>>,
     location1: String,
     worker1Transit: Pair<String, Int>?,
+    worker1Path: String,
     location2: String,
     worker2Transit: Pair<String, Int>?,
+    worker2Path: String,
     time: Int,
     flowRate: Int,
     pressureReleased: Int
@@ -209,67 +241,85 @@ class Day16 : Day {
     if (worker2Transit != null) {
       max += max(0, 26 - worker2Transit.second - time) * valves[worker2Transit.first]!!.flowRate
     }
+    val base = max
 
-    if (worker1Transit == null) {
+    if (worker1Transit == null && canImprove(base, toVisit, valves, 26 - time)) {
       for (v in toVisit) {
-        max = max(max, maxPressureTwoWorkers(
-          toVisit.filter { j -> j != v },
-          valves,
-          distances,
-          v,
-          Pair(v, distances[location1]!![v]!! + 1),
-          location2,
-          worker2Transit,
-          time,
-          flowRate,
-          pressureReleased
-        ))
+        if (haveNotEncounteredPath(worker1Path + v, worker2Path)) {
+          max = max(
+            max, maxPressureTwoWorkers(
+              toVisit.filter { j -> j != v },
+              valves,
+              distances,
+              v,
+              Pair(v, distances[location1]!![v]!! + 1),
+              worker1Path + v,
+              location2,
+              worker2Transit,
+              worker2Path,
+              time,
+              flowRate,
+              pressureReleased
+            )
+          )
+        }
       }
-    } else if (worker2Transit == null || worker1Transit.second <= worker2Transit.second) {
+    } else if (worker1Transit != null && (toVisit.isEmpty() || (worker2Transit != null && worker1Transit.second <= worker2Transit.second))) {
       max = max(max, maxPressureTwoWorkers(
         toVisit,
         valves,
         distances,
         location1,
         null,
+        worker1Path,
         location2,
         if (worker2Transit != null) Pair(worker2Transit.first, worker2Transit.second - worker1Transit.second) else null,
+        worker2Path,
         time + worker1Transit.second,
         flowRate + valves[worker1Transit.first]!!.flowRate,
         pressureReleased + flowRate * worker1Transit.second
       ))
     }
 
-    if (worker2Transit == null) {
+    if (worker2Transit == null && canImprove(base, toVisit, valves, 26 - time)) {
       for (v in toVisit) {
-        max = max(max, maxPressureTwoWorkers(
-          toVisit.filter { j -> j != v },
-          valves,
-          distances,
-          location1,
-          worker1Transit,
-          v,
-          Pair(v, distances[location2]!![v]!! + 1),
-          time,
-          flowRate,
-          pressureReleased
-        ))
+        if (haveNotEncounteredPath(worker1Path, worker2Path + v)) {
+          max = max(
+            max, maxPressureTwoWorkers(
+              toVisit.filter { j -> j != v },
+              valves,
+              distances,
+              location1,
+              worker1Transit,
+              worker1Path,
+              v,
+              Pair(v, distances[location2]!![v]!! + 1),
+              worker2Path + v,
+              time,
+              flowRate,
+              pressureReleased
+            )
+          )
+        }
       }
-    } else if (worker1Transit == null || worker2Transit.second < worker1Transit.second){
+    } else if (worker2Transit != null && (toVisit.isEmpty() || (worker1Transit != null && worker2Transit.second < worker1Transit.second))){
       max = max(max, maxPressureTwoWorkers(
         toVisit,
         valves,
         distances,
         location1,
         if (worker1Transit != null) Pair(worker1Transit.first, worker1Transit.second - worker2Transit.second) else null,
+        worker1Path,
         location2,
         null,
+        worker2Path,
         time + worker2Transit.second,
         flowRate + valves[worker2Transit.first]!!.flowRate,
         pressureReleased + flowRate * worker2Transit.second
       ))
     }
 
+    globalMax = max(globalMax, max)
     return max
   }
 
@@ -338,8 +388,10 @@ class Day16 : Day {
       distances,
       "AA",
       null,
+      "",
       "AA",
       null,
+      "",
       0,
       0,
       0
