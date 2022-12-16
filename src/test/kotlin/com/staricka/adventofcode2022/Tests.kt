@@ -455,5 +455,6 @@ class Day16Test : StandardTest(
     Valve II has flow rate=0; tunnels lead to valves AA, JJ
     Valve JJ has flow rate=21; tunnel leads to valve II
   """.trimIndent(),
-  1651
+  1651,
+  1707
 )

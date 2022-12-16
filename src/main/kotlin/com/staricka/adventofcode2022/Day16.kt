@@ -186,6 +186,93 @@ class Day16 : Day {
     return max
   }
 
+  fun maxPressureTwoWorkers(
+    toVisit: List<String>,
+    valves: Map<String, Valve>,
+    distances: Map<String, Map<String, Int>>,
+    location1: String,
+    worker1Transit: Pair<String, Int>?,
+    location2: String,
+    worker2Transit: Pair<String, Int>?,
+    time: Int,
+    flowRate: Int,
+    pressureReleased: Int
+  ) : Int {
+    if (time > 26) {
+      return -1
+    }
+
+    var max = pressureReleased + (26 - time) * flowRate
+    if (worker1Transit != null) {
+      max += max(0, 26 - worker1Transit.second - time) * valves[worker1Transit.first]!!.flowRate
+    }
+    if (worker2Transit != null) {
+      max += max(0, 26 - worker2Transit.second - time) * valves[worker2Transit.first]!!.flowRate
+    }
+
+    if (worker1Transit == null) {
+      for (v in toVisit) {
+        max = max(max, maxPressureTwoWorkers(
+          toVisit.filter { j -> j != v },
+          valves,
+          distances,
+          v,
+          Pair(v, distances[location1]!![v]!! + 1),
+          location2,
+          worker2Transit,
+          time,
+          flowRate,
+          pressureReleased
+        ))
+      }
+    } else if (worker2Transit == null || worker1Transit.second <= worker2Transit.second) {
+      max = max(max, maxPressureTwoWorkers(
+        toVisit,
+        valves,
+        distances,
+        location1,
+        null,
+        location2,
+        if (worker2Transit != null) Pair(worker2Transit.first, worker2Transit.second - worker1Transit.second) else null,
+        time + worker1Transit.second,
+        flowRate + valves[worker1Transit.first]!!.flowRate,
+        pressureReleased + flowRate * worker1Transit.second
+      ))
+    }
+
+    if (worker2Transit == null) {
+      for (v in toVisit) {
+        max = max(max, maxPressureTwoWorkers(
+          toVisit.filter { j -> j != v },
+          valves,
+          distances,
+          location1,
+          worker1Transit,
+          v,
+          Pair(v, distances[location2]!![v]!! + 1),
+          time,
+          flowRate,
+          pressureReleased
+        ))
+      }
+    } else if (worker1Transit == null || worker2Transit.second < worker1Transit.second){
+      max = max(max, maxPressureTwoWorkers(
+        toVisit,
+        valves,
+        distances,
+        location1,
+        if (worker1Transit != null) Pair(worker1Transit.first, worker1Transit.second - worker2Transit.second) else null,
+        location2,
+        null,
+        time + worker2Transit.second,
+        flowRate + valves[worker2Transit.first]!!.flowRate,
+        pressureReleased + flowRate * worker2Transit.second
+      ))
+    }
+
+    return max
+  }
+
   override fun part1(input: String): Any? {
     val (valves, tunnels) = parseInput(input)
     val distances = distances(tunnels)
@@ -242,6 +329,20 @@ class Day16 : Day {
   }
 
   override fun part2(input: String): Any? {
-    TODO("Not yet implemented")
+    val (valves, tunnels) = parseInput(input)
+    val distances = distances(tunnels)
+
+    return maxPressureTwoWorkers(
+      valves.filter { (_, v) -> v.flowRate > 0 }.keys.toList(),
+      valves,
+      distances,
+      "AA",
+      null,
+      "AA",
+      null,
+      0,
+      0,
+      0
+    )
   }
 }
