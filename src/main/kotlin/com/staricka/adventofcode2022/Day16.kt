@@ -90,9 +90,10 @@ class Day16 : Day {
       }
 
   fun distances(tunnels: Map<String, List<String>>): Map<String, Map<String, Int>> {
-    val result = HashMap<String, HashMap<String, Int>>()
+    var result = HashMap<String, HashMap<String, Int>>()
     for ((k, l) in tunnels) {
       for (v in l) {
+        result.computeIfAbsent(k) { HashMap() }[k] = 0
         result.computeIfAbsent(k) { HashMap() }[v] = 1
         result.computeIfAbsent(v) { HashMap() }[k] = 1
       }
@@ -100,6 +101,7 @@ class Day16 : Day {
 
     var changed = true
     while (changed) {
+      val nextResult = result.map { (k, v) -> k to HashMap(v) }.toMap(HashMap())
       changed = false
       for (k in tunnels.keys) {
         for (v in tunnels.keys) {
@@ -110,12 +112,14 @@ class Day16 : Day {
               iCost + result[intermediate]!![v]!!
             }.minOrNull()
             if (minConnection != null) {
-              result[k]!![v] = minConnection
+              nextResult[k]!![v] = minConnection
+              nextResult[v]!![k] = minConnection
               changed = true
             }
           }
         }
       }
+      result = nextResult
     }
 
     return result
@@ -185,6 +189,16 @@ class Day16 : Day {
   override fun part1(input: String): Any? {
     val (valves, tunnels) = parseInput(input)
     val distances = distances(tunnels)
+
+//    input.lines().forEach {
+//      val v = it.split(" ")[1]
+//      val t = tunnels[v]!!
+//      val p = t.size > 1
+//      println(
+//        "Valve $v has flow rate=${valves[v]!!.flowRate}; tunnel${if (p) "s" else ""}"
+//        + " lead${if (p) "" else "s"} to valve${if (p) "s" else ""} ${t.joinToString(", ")}"
+//      )
+//    }
 
     return maxPressure(
       valves.filter { (_, v) -> v.flowRate > 0 }.keys.toList(),
