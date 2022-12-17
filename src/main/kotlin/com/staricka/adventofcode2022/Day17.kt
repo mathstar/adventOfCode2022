@@ -149,7 +149,6 @@ class Day17 : Day {
     }
 
     fun stopFalling(): Int {
-      //var minX = 10L
       val fallingTiles = tiles.flatMap { (x, m) ->
         m.filter { (_, t) ->
           t == Tile.FALLING_ROCK
@@ -159,7 +158,6 @@ class Day17 : Day {
       }
       maxRockHeight = max(maxRockHeight, fallingTiles.maxOfOrNull { it.second } ?: maxRockHeight)
       for ((x, y) in fallingTiles) {
-        //minX = min(minX, x)
         topRock[x.toInt()] = max(topRock[x.toInt()], y)
         put(x, y, Tile.ROCK)
       }
