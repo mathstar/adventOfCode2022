@@ -458,3 +458,10 @@ class Day16Test : StandardTest(
   1651,
   1707
 )
+
+class Day17Test : StandardTest(
+  Day17(),
+  ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>",
+  3068L,
+  1514285714288L
+)
