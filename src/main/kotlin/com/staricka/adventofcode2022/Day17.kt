@@ -1,13 +1,11 @@
 package com.staricka.adventofcode2022
 
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.system.exitProcess
 
 class Day17 : Day {
   override val id = 17
 
-  val rockPatterns = listOf(
+  private val rockPatterns = listOf(
     RockPattern("####"),
     RockPattern("""
       .#.
@@ -51,9 +49,11 @@ class Day17 : Day {
   }
 
   class Grid {
-    val tiles = HashMap<Long, HashMap<Long, Tile>>()
+    private val tiles = HashMap<Long, HashMap<Long, Tile>>()
     var maxRockHeight = -1L
+    private val topRock = LongArray(7) {-1}
 
+    @Suppress("unused")
     fun render() {
       for (y in (0L..maxRockHeight).reversed()) {
         print("|")
@@ -68,6 +68,19 @@ class Day17 : Day {
       }
       println("---------")
       println()
+    }
+
+    @Suppress("unused")
+    fun render(y: Long) {
+      print('|')
+      for (x in 0L..6L) {
+        print(when (get(x, y)) {
+          Tile.AIR -> '.'
+          Tile.FALLING_ROCK -> '@'
+          Tile.ROCK -> '#'
+        })
+      }
+      println('|')
     }
 
     fun get(x: Long, y: Long): Tile = tiles[x]?.get(y) ?: Tile.AIR
@@ -129,8 +142,14 @@ class Day17 : Day {
       return true
     }
 
-    fun stopFalling(): Long {
-      var minX = 10L
+    // hash derived from top surface of the rocks
+    private fun topOfRockHash() : Int {
+      val minRock = topRock.min()
+      return topRock.map { it - minRock }.hashCode()
+    }
+
+    fun stopFalling(): Int {
+      //var minX = 10L
       val fallingTiles = tiles.flatMap { (x, m) ->
         m.filter { (_, t) ->
           t == Tile.FALLING_ROCK
@@ -140,14 +159,15 @@ class Day17 : Day {
       }
       maxRockHeight = max(maxRockHeight, fallingTiles.maxOfOrNull { it.second } ?: maxRockHeight)
       for ((x, y) in fallingTiles) {
-        minX = min(minX, x)
+        //minX = min(minX, x)
+        topRock[x.toInt()] = max(topRock[x.toInt()], y)
         put(x, y, Tile.ROCK)
       }
-      return minX
+      return topOfRockHash()
     }
   }
 
-  fun parseDirections(input: String): List<Pair<Long, Long>> =
+  private fun parseDirections(input: String): List<Pair<Long, Long>> =
     input.map {
       when (it) {
         '<' -> Pair(-1L, 0L)
@@ -158,7 +178,7 @@ class Day17 : Day {
 
   val down = Pair(0L, -1L)
 
-  override fun part1(input: String): Any? {
+  override fun part1(input: String): Any {
     val directions = parseDirections(input)
     val grid = Grid()
     var directionIndex = 0
@@ -182,13 +202,13 @@ class Day17 : Day {
     return grid.maxRockHeight + 1
   }
 
-  override fun part2(input: String): Any? {
+  override fun part2(input: String): Any {
     val directions = parseDirections(input)
     val grid = Grid()
     var directionIndex = 0
 
     val maxHeightAtStep = HashMap<Long, Long>()
-    val cycleCheck = HashMap<Triple<Long, Long, Long>, Long>()
+    val cycleCheck = HashMap<Triple<Long, Long, Int>, Long>()
 
     for (i in 0 until 1000000000000) {
       val rockPattern = rockPatterns[(i % rockPatterns.size).toInt()]
@@ -199,10 +219,10 @@ class Day17 : Day {
         directionIndex %= directions.size
 
         if (!grid.step(down)) {
-          val minX = grid.stopFalling()
+          val surfaceHash = grid.stopFalling()
           maxHeightAtStep[i] = grid.maxRockHeight
 
-          val cycleKey = Triple((i % rockPatterns.size), directionIndex - 1L, minX)
+          val cycleKey = Triple((i % rockPatterns.size), directionIndex - 1L, surfaceHash)
           if (cycleCheck.containsKey(cycleKey)) {
 
             val cycleStart = cycleCheck[cycleKey]!!

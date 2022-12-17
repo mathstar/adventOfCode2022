@@ -108,3 +108,9 @@ class Day16RegressionTest : RegressionTest(
   1947,
   2556
 )
+
+class Day17RegressionTest : RegressionTest(
+  Day17(),
+  3235L,
+  1591860465110L
+)
