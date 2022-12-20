@@ -120,3 +120,9 @@ class Day18RegressionTest : RegressionTest(
   3498,
   2008
 )
+
+class Day20RegressionTest : RegressionTest(
+  Day20(),
+  6640,
+  11893839037215L
+)

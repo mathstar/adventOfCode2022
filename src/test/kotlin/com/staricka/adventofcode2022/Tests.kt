@@ -486,3 +486,34 @@ class Day18Test : StandardTest(
   64,
   58
 )
+
+class Day20Test : StandardTest(
+  Day20(),
+  """
+    1
+    2
+    -3
+    3
+    -2
+    0
+    4
+  """.trimIndent(),
+  3,
+  1623178306L
+) {
+  @Test
+  fun additionalExample() {
+    val l = "4, -2, 5, 6, 7, 8, 9".split(",").map { Day20.Datum(it.trim().toInt()) }
+    val file = Day20.File(l)
+    file.mix(listOf(l[1]))
+    assertEquals(listOf(4,5,6,7,8,-2,9), file.l.map {it.value})
+  }
+
+  @Test
+  fun duplicates() {
+    val l = "1, 2, 1, 3, 4".split(",").map { Day20.Datum(it.trim().toInt()) }
+    val file = Day20.File(l)
+    file.mix(listOf(l[2]))
+    assertEquals(listOf(1,2,3,1,4), file.l.map {it.value})
+  }
+}
