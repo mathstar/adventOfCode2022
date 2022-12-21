@@ -2,31 +2,26 @@ package com.staricka.adventofcode2022
 
 import com.staricka.adventofcode2022.Day21.Monkey.Companion.parseMonkey
 import java.util.Random
-import kotlin.math.max
 
 class Day21 : Day {
   override val id = 21
 
-  interface Expression
-
-  class ConstExpression(val value: Long) : Expression
-
-  class HumanExpression(val coefficients: List<Long>) : Expression
-
   interface Job {
     fun value(monkeys: Map<String, Monkey>): Long
-    fun expression(monkeys: Map<String, Monkey>): Expression
+    fun includesHuman(monkeys: Map<String, Monkey>): Boolean
   }
 
-  class ConstantJob(val value: Long) : Job {
+  class ConstantJob(private val value: Long) : Job {
     override fun value(monkeys: Map<String, Monkey>): Long = value
-    override fun expression(monkeys: Map<String, Monkey>) = ConstExpression(value)
+    override fun includesHuman(monkeys: Map<String, Monkey>): Boolean = false
   }
 
   enum class Op {
     PLUS, TIMES, MINUS, DIVIDE
   }
 
+  // left and right fields for debugging
+  @Suppress("unused")
   class DivisionException(val left: Long, val right: Long) : Exception()
 
   class OperationJob(val left: String, val right: String, val op: Op) : Job {
@@ -44,79 +39,14 @@ class Day21 : Day {
       }
     }
 
-    override fun expression(monkeys: Map<String, Monkey>): Expression {
-      val leftExpr = monkeys[left]!!.job.expression(monkeys)
-      val rightExpr = monkeys[right]!!.job.expression(monkeys)
-
-      if (leftExpr is ConstExpression && rightExpr is ConstExpression) {
-        val leftVal = leftExpr.value
-        val rightVal = rightExpr.value
-        return ConstExpression(when(op) {
-          Op.PLUS -> leftVal + rightVal
-          Op.TIMES -> leftVal * rightVal
-          Op.MINUS -> leftVal - rightVal
-          Op.DIVIDE -> leftVal / rightVal
-        })
-      }
-
-      var leftHumanExpression = when (leftExpr) {
-        is HumanExpression -> leftExpr
-        is ConstExpression -> HumanExpression(listOf(leftExpr.value))
-        else -> throw Exception()
-      }
-
-      var rightHumanExpression = when (rightExpr) {
-        is HumanExpression -> rightExpr
-        is ConstExpression -> HumanExpression(listOf(rightExpr.value))
-        else -> throw Exception()
-      }
-
-      return when (op) {
-        Op.PLUS -> {
-          val powers = max(leftHumanExpression.coefficients.size, rightHumanExpression.coefficients.size)
-          HumanExpression(
-            (0 until powers).map {
-              leftHumanExpression.coefficients.getOrElse(it) {0} +
-                  rightHumanExpression.coefficients.getOrElse(it) {0}
-            }
-          )
-        }
-        Op.MINUS -> {
-          val powers = max(leftHumanExpression.coefficients.size, rightHumanExpression.coefficients.size)
-          HumanExpression(
-            (0 until powers).map {
-              leftHumanExpression.coefficients.getOrElse(it) {0} -
-                  rightHumanExpression.coefficients.getOrElse(it) {0}
-            }
-          )
-        }
-        Op.TIMES -> {
-          val powers = (leftHumanExpression.coefficients.size - 1) + (rightHumanExpression.coefficients.size - 1) + 1
-          val coefficients = ArrayList<Long>()
-          for (i in 0 until powers) coefficients.add(0)
-          for ((i, m) in leftHumanExpression.coefficients.withIndex()) {
-            for ((j, n) in rightHumanExpression.coefficients.withIndex()) {
-              coefficients[i + j] += m * n
-            }
-          }
-          return HumanExpression(coefficients)
-        }
-        Op.DIVIDE -> {
-          val divisor = if (leftHumanExpression.coefficients.size == 1)
-            leftHumanExpression.coefficients[0]
-          else if (rightHumanExpression.coefficients.size == 1)
-            rightHumanExpression.coefficients[0]
-          else throw Exception()
-          val other = if (leftHumanExpression.coefficients.size == 1) leftHumanExpression else rightHumanExpression
-          return HumanExpression(other.coefficients.map { it / divisor })
-        }
-      }
-    }
+    override fun includesHuman(monkeys: Map<String, Monkey>): Boolean =
+      monkeys[left]!!.job.includesHuman(monkeys) ||
+          monkeys[right]!!.job.includesHuman(monkeys)
   }
 
-  class HumanJob(val value: Long) : Job {
+  class HumanJob(private val value: Long) : Job {
     override fun value(monkeys: Map<String, Monkey>): Long = value
-    override fun expression(monkeys: Map<String, Monkey>): Expression = HumanExpression(listOf(0, 1))
+    override fun includesHuman(monkeys: Map<String, Monkey>): Boolean = true
   }
 
   class Monkey(val id: String, val job: Job) {
@@ -154,23 +84,23 @@ class Day21 : Day {
     }
   }
 
-  override fun part1(input: String): Any? {
+  override fun part1(input: String): Any {
     val monkeys = input.lines().map { it.parseMonkey() }.associateBy { it.id }
 
     return monkeys["root"]!!.job.value(monkeys)
   }
 
-  override fun part2(input: String): Any? {
+  override fun part2(input: String): Any {
     val monkeys = input.lines().map { it.parseMonkey() }.associateBy { it.id }.toMutableMap()
 
     val rootJob = monkeys["root"]!!.job as OperationJob
 
-    val constant = if (monkeys[rootJob.left]!!.job.expression(monkeys) is ConstExpression)
+    val constant = if (!monkeys[rootJob.left]!!.job.includesHuman(monkeys))
       monkeys[rootJob.left]!!.job.value(monkeys)
     else
       monkeys[rootJob.right]!!.job.value(monkeys)
 
-    val human = if (monkeys[rootJob.left]!!.job.expression(monkeys) is HumanExpression)
+    val human = if (monkeys[rootJob.left]!!.job.includesHuman(monkeys))
       monkeys[rootJob.left]!!.job
     else
       monkeys[rootJob.right]!!.job
