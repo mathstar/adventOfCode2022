@@ -1,6 +1,7 @@
 package com.staricka.adventofcode2022
 
 import com.staricka.adventofcode2022.Day21.Monkey.Companion.parseMonkey
+import java.util.Random
 import kotlin.math.max
 
 class Day21 : Day {
@@ -26,15 +27,20 @@ class Day21 : Day {
     PLUS, TIMES, MINUS, DIVIDE
   }
 
+  class DivisionException(val left: Long, val right: Long) : Exception()
+
   class OperationJob(val left: String, val right: String, val op: Op) : Job {
     override fun value(monkeys: Map<String, Monkey>): Long {
       val leftVal = monkeys[left]!!.job.value(monkeys)
       val rightVal = monkeys[right]!!.job.value(monkeys)
       return when(op) {
-        Op.PLUS -> leftVal + rightVal
-        Op.TIMES -> leftVal * rightVal
-        Op.MINUS -> leftVal - rightVal
-        Op.DIVIDE -> leftVal / rightVal
+        Op.PLUS -> Math.addExact(leftVal, rightVal)
+        Op.TIMES -> Math.multiplyExact(leftVal, rightVal)
+        Op.MINUS -> Math.subtractExact(leftVal, rightVal)
+        Op.DIVIDE -> {
+          if (leftVal % rightVal != 0L) throw DivisionException(leftVal, rightVal)
+          leftVal / rightVal
+        }
       }
     }
 
@@ -104,7 +110,6 @@ class Day21 : Day {
           val other = if (leftHumanExpression.coefficients.size == 1) leftHumanExpression else rightHumanExpression
           return HumanExpression(other.coefficients.map { it / divisor })
         }
-        else -> throw Exception()
       }
     }
   }
@@ -159,14 +164,70 @@ class Day21 : Day {
     val monkeys = input.lines().map { it.parseMonkey() }.associateBy { it.id }.toMutableMap()
 
     val rootJob = monkeys["root"]!!.job as OperationJob
-    //val left = monkeys[rootJob.left]!!.job.expression(monkeys)
-    //val right = monkeys[rootJob.right]!!.job.expression(monkeys)
 
-    for (i in 0..Long.MAX_VALUE) {
-      monkeys["humn"] = Monkey("humn", ConstantJob(i))
-      if (monkeys[rootJob.left]!!.job.value(monkeys) == monkeys[rootJob.right]!!.job.value(monkeys))
-        return i
+    val constant = if (monkeys[rootJob.left]!!.job.expression(monkeys) is ConstExpression)
+      monkeys[rootJob.left]!!.job.value(monkeys)
+    else
+      monkeys[rootJob.right]!!.job.value(monkeys)
+
+    val human = if (monkeys[rootJob.left]!!.job.expression(monkeys) is HumanExpression)
+      monkeys[rootJob.left]!!.job
+    else
+      monkeys[rootJob.right]!!.job
+
+    var testVal = 4200L
+    var a = -1L
+    while (a < 0) {
+      try {
+        monkeys["humn"] = Monkey("humn", ConstantJob(testVal++))
+        a = human.value(monkeys)
+      } catch (_: Exception) {}
     }
-    return ""
+    var b = -1L
+    while (b < 0) {
+      try {
+        monkeys["humn"] = Monkey("humn", ConstantJob(testVal++))
+        b = human.value(monkeys)
+      } catch (_: Exception) {}
+    }
+    val increasing = a < b
+
+    var lower = 0L
+    var upper = Long.MAX_VALUE
+    var pivot = upper / 2
+    while (true) {
+      monkeys["humn"] = Monkey("humn", ConstantJob(pivot))
+      try {
+        val result = human.value(monkeys)
+        if (result == constant) return pivot
+        if (result > constant) {
+          if (increasing) {
+            upper = pivot - 1L
+          } else {
+            lower = pivot + 1L
+          }
+        } else {
+          if (increasing) {
+            lower = pivot + 1L
+          } else {
+            upper = pivot - 1L
+          }
+        }
+
+        pivot = upper - (upper - lower) / 2
+      } catch (e: DivisionException) {
+        pivot = Random().nextLong(lower, upper + 1)
+      } catch (e: Exception) {
+        // this feels like the wrong direction, but this is what works
+        // TODO will revisit with not tired brain
+        if (!increasing) {
+          upper = pivot - 1L
+        } else {
+          lower = pivot + 1L
+        }
+        pivot = upper - (upper - lower) / 2
+      }
+
+    }
   }
 }
