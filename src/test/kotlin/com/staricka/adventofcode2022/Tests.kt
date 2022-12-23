@@ -540,3 +540,30 @@ class Day21Test : StandardTest(
   152L,
   301L
 )
+
+class Day23Test : StandardTest(
+  Day23(),
+  """
+    ....#..
+    ..###.#
+    #...#.#
+    .#...##
+    #.###..
+    ##.#.##
+    .#..#..
+  """.trimIndent(),
+  110,
+  20
+) {
+  @Test
+  fun smallExample() {
+    day.part1("""
+      .....
+      ..##.
+      ..#..
+      .....
+      ..##.
+      .....
+    """.trimIndent())
+  }
+}

@@ -132,3 +132,9 @@ class Day21RegressionTest : RegressionTest(
   85616733059734L,
   3560324848168L
 )
+
+class Day23RegressionTest : RegressionTest(
+  Day23(),
+  3966,
+  933
+)
