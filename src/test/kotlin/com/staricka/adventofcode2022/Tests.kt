@@ -567,3 +567,17 @@ class Day23Test : StandardTest(
     """.trimIndent())
   }
 }
+
+class Day24Test : StandardTest(
+  Day24(),
+  """
+    #.######
+    #>>.<^<#
+    #.<..<<#
+    #>v.><>#
+    #<^v^^>#
+    ######.#
+  """.trimIndent(),
+  18,
+  54
+)
