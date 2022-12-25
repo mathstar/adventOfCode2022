@@ -144,3 +144,9 @@ class Day24RegressionTest : RegressionTest(
   279,
   762
 )
+
+class Day25RegressionTest : RegressionTest(
+  Day25(),
+  "20==1==12=0111=2--20",
+  ""
+)
